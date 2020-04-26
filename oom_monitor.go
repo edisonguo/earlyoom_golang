@@ -174,7 +174,7 @@ func (mon *OOMMonitor) getPollInterval(memInfo *memoryInfo) int {
 }
 
 func (mon *OOMMonitor) StartMonitorLoop() error {
-	pattern := regexp.MustCompile("chrome*")
+	pattern := regexp.MustCompile(mon.ExecMatch)
 
 	isMemInfoFirst := true
 	isNoProcessFound := true
@@ -216,10 +216,10 @@ func (mon *OOMMonitor) StartMonitorLoop() error {
 			for i := 1; i < 100; i++ {
 				err := syscall.Kill(maxProc.Pid, 0)
 				if err != nil {
+					if mon.Verbose {
+						log.Printf("OOM terminated process in %.1f secs: %s, PID: %d", float32(i)*0.1, maxProc.Name, maxProc.Pid)
+					}
 					break
-				}
-				if mon.Verbose {
-					log.Printf("OOM terminated process in %.1f secs: %s, PID: %d", float32(i)*0.1, maxProc.Name, maxProc.Pid)
 				}
 				time.Sleep(100 * time.Millisecond)
 			}
